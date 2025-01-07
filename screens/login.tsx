@@ -4,7 +4,7 @@ import ListComponent from '../components/list';
 
 const LoginScreen = () => {
   return (
-    <View>
+    <View style={{flex: 1}}>
       <Text>login screen</Text>
       <ListComponent
         title = 'list1' initialData={[

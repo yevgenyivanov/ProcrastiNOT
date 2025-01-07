@@ -9,6 +9,8 @@ import {
   StyleSheet 
 } from 'react-native';
 
+// TODO: progress state issue , notifications, pressing completed again should uncomplete, get random item can return completed item, list class
+
 const ListComponent = ({title, initialData}) => {
   const [list, setList] = useState(initialData || []);
   const [inputValue, setInputValue] = useState('');
@@ -17,13 +19,14 @@ const ListComponent = ({title, initialData}) => {
   const [notificationFrequency, setNotificationFrequency] = useState(null);
 
   // Helper Functions
-  const calculateProgress = () => {
-    const completedCount = list.filter(item => item.completed).length;
-    return list.length ? (completedCount / list.length) * 100 : 0;
+  const calculateProgress = (newList: any) => {
+    if(!newList) return 0;
+    const completedCount = newList.filter(item => item.completed).length;
+    return newList.length ? (completedCount / newList.length) * 100 : 0;
   };
 
-  const updateProgress = () => {
-    setProgress(calculateProgress());
+  const updateProgress = (newList: any) => {
+    setProgress(calculateProgress(newList));
   };
 
   // Function to add an item
@@ -33,9 +36,10 @@ const ListComponent = ({title, initialData}) => {
       return;
     }
     const newItem = { id: Date.now(), text, completed: false };
-    setList([...list, newItem]);
+    const newList = [...list, newItem];
+    setList(newList); 
     setInputValue('');
-    updateProgress();
+    updateProgress(list);
   };
 
   // Function to get a random item
@@ -52,7 +56,7 @@ const ListComponent = ({title, initialData}) => {
   const deleteItem = (id) => {
     const updatedList = list.filter(item => item.id !== id);
     setList(updatedList);
-    updateProgress();
+    updateProgress(updatedList);
   };
 
   // Function to mark an item as completed
@@ -61,7 +65,7 @@ const ListComponent = ({title, initialData}) => {
       item.id === id ? { ...item, completed: true } : item
     );
     setList(updatedList);
-    updateProgress();
+    updateProgress(updatedList);
   };
 
   // Function to set notification frequency
@@ -69,6 +73,7 @@ const ListComponent = ({title, initialData}) => {
     setNotificationFrequency(frequency);
     Alert.alert('Notification Set', `Reminder set to: ${frequency}`);
   };
+  
 
   return (
     <View style={styles.container}>
@@ -79,12 +84,14 @@ const ListComponent = ({title, initialData}) => {
       </Text>
       
       {/* Add Item Input */}
+
       <TextInput
         style={styles.input}
         placeholder="Add a new item"
         value={inputValue}
         onChangeText={setInputValue}
       />
+
       <TouchableOpacity
         style={styles.addButton}
         onPress={() => addItem(inputValue)}
@@ -129,6 +136,7 @@ const ListComponent = ({title, initialData}) => {
 // Styles
 const styles = StyleSheet.create({
   container: {
+    flexDirection: 'column',
     flex: 1,
     padding: 20,
     backgroundColor: '#f5f5f5',
@@ -149,23 +157,24 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   input: {
+    height: 40,
     borderColor: '#6200ee',
     color: 'black',
-    fontSize: 14,
     borderWidth: 1,
     borderRadius: 5,
     // padding: 10,
     marginBottom: 10,
   },
   addButton: {
+    justifyContent: 'center',
+    alignItems: 'center',
     backgroundColor: '#6200ee',
     padding: 10,
     borderRadius: 5,
-    alignItems: 'baseline',
-    marginBottom: 20,
   },
   buttonText: {
-    color: '#1e252b',
+    fontSize: 12,
+    color: 'black',
     fontWeight: 'bold',
   },
   listItem: {
