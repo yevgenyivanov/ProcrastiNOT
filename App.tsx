@@ -17,7 +17,6 @@ const Stack = createStackNavigator<RootStackParamList>();
 const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [userToken, setUserToken] = useState<string | null>(null);
-
   useEffect(() => {
     const checkToken = async () => {
       const token = await SecureStore.getItemAsync('userToken');
