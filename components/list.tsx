@@ -9,7 +9,7 @@ import {
   StyleSheet 
 } from 'react-native';
 
-// TODO: progress state issue , notifications, pressing completed again should uncomplete, get random item can return completed item, list class
+// TODO: notifications, get random item can return completed item, list class
 
 const ListComponent = ({title, initialData}) => {
   const [list, setList] = useState(initialData || []);
@@ -39,7 +39,7 @@ const ListComponent = ({title, initialData}) => {
     const newList = [...list, newItem];
     setList(newList); 
     setInputValue('');
-    updateProgress(list);
+    updateProgress(newList);
   };
 
   // Function to get a random item
@@ -48,7 +48,12 @@ const ListComponent = ({title, initialData}) => {
       Alert.alert('Info', 'No items in the list!');
       return;
     }
-    const randomItem = list[Math.floor(Math.random() * list.length)];
+    const filteredList = list.filter(item => !item.completed);
+    if (filteredList.length === 0) {
+      Alert.alert('Info', 'No items in filtered list!');
+      return;
+    }
+    const randomItem = filteredList[Math.floor(Math.random() * filteredList.length)];
     Alert.alert('Random Item', randomItem.text);
   };
 
@@ -62,7 +67,7 @@ const ListComponent = ({title, initialData}) => {
   // Function to mark an item as completed
   const markAsCompleted = (id) => {
     const updatedList = list.map(item =>
-      item.id === id ? { ...item, completed: true } : item
+      item.id === id ? { ...item, completed: (item.completed ? false : true) } : item
     );
     setList(updatedList);
     updateProgress(updatedList);
