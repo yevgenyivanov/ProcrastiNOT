@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   View, 
   Text, 
@@ -8,38 +8,50 @@ import {
   Alert, 
   StyleSheet 
 } from 'react-native';
-
+import { AbstractList, AbstractListItem } from '../utils/types';
 // TODO: notifications, get random item can return completed item, list class
 
-const ListComponent = ({title, initialData}) => {
-  const [list, setList] = useState(initialData || []);
-  const [inputValue, setInputValue] = useState('');
-  const [progress, setProgress] = useState(0);
-  const [creationDate] = useState(new Date());
-  const [notificationFrequency, setNotificationFrequency] = useState(null);
+interface ListComponentProps {
+  importedList: AbstractList;
+}
+
+const ListComponent: React.FC<ListComponentProps> = ({importedList}) => {
+  const [list, setList] = useState<AbstractList>(importedList);
+  const [inputValue, setInputValue] = useState<string>('');
+  const [date, setDate] = useState<Date | null >(null);
+  const [progress, setProgress] = useState<number>(0);
+  const [notificationFrequency, setNotificationFrequency] = useState<string | null>(null);
+
+
+  useEffect(() => {
+    setDate(list.date);
+    updateProgress(list.items);
+  }, [list]);
 
   // Helper Functions
-  const calculateProgress = (newList: any) => {
-    if(!newList) return 0;
-    const completedCount = newList.filter(item => item.completed).length;
-    return newList.length ? (completedCount / newList.length) * 100 : 0;
+  const calculateProgress = (currentItems: AbstractListItem[]) => {
+    if(!currentItems) return 0;
+    const completedCount = currentItems.filter(item => item.completed).length;
+    return currentItems.length ? (completedCount / currentItems.length) * 100 : 0;
   };
 
-  const updateProgress = (newList: any) => {
-    setProgress(calculateProgress(newList));
+
+  const updateProgress = (currentItems: AbstractListItem[]) => {
+    setProgress(calculateProgress(currentItems));
   };
 
   // Function to add an item
-  const addItem = (text) => {
+  const addItem = (text: string) => {
     if (text.trim() === '') {
       Alert.alert('Error', 'Item cannot be empty!');
       return;
     }
-    const newItem = { id: Date.now(), text, completed: false };
-    const newList = [...list, newItem];
+    const newItem = new AbstractListItem(text);
+    // const newList = [...list, newItem];
+    const newList = AbstractList.fromPlainObject({ ...list, items: [...list.items, newItem] });
     setList(newList); 
     setInputValue('');
-    updateProgress(newList);
+    updateProgress(newList.items);
   };
 
   // Function to get a random item
@@ -58,23 +70,25 @@ const ListComponent = ({title, initialData}) => {
   };
 
   // Function to delete an item
-  const deleteItem = (id) => {
-    const updatedList = list.filter(item => item.id !== id);
+  const deleteItem = (index: number) => {
+    const updatedItems = [...list.items];
+    updatedItems.splice(index, 1);
+    const updatedList = AbstractList.fromPlainObject({ ...list, items: updatedItems });
     setList(updatedList);
-    updateProgress(updatedList);
+    updateProgress(updatedItems);
   };
 
   // Function to mark an item as completed
-  const markAsCompleted = (id) => {
-    const updatedList = list.map(item =>
-      item.id === id ? { ...item, completed: (item.completed ? false : true) } : item
-    );
+  const markAsCompleted = (index: number) => {
+    const updatedItems = [...list.items];
+    updatedItems[index].completed = !updatedItems[index].completed;
+    const updatedList = AbstractList.fromPlainObject({ ...list, items: updatedItems });
     setList(updatedList);
-    updateProgress(updatedList);
+    updateProgress(updatedItems);
   };
 
   // Function to set notification frequency
-  const setNotification = (frequency) => {
+  const setNotification = (frequency: string) => {
     setNotificationFrequency(frequency);
     Alert.alert('Notification Set', `Reminder set to: ${frequency}`);
   };
@@ -83,7 +97,8 @@ const ListComponent = ({title, initialData}) => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>To-Do List</Text>
-      <Text style={styles.subTitle}>Created on: {creationDate.toLocaleDateString()}</Text>
+      <Text>{list.title ? list.title : ""}</Text>
+      <Text style={styles.subTitle}>Created on: {date ? date.toString() : ""}</Text>
       <Text style={styles.progress}>
         Progress: {progress.toFixed(1)}%
       </Text>
@@ -106,17 +121,17 @@ const ListComponent = ({title, initialData}) => {
 
       {/* List of Items */}
       <FlatList
-        data={list}
-        keyExtractor={item => item.id.toString()}
-        renderItem={({ item }) => (
+        data={list.items}
+        // keyExtractor={(item,index) => index.toString()}
+        renderItem={({ item,index }) => (
           <View style={styles.listItem}>
             <Text style={item.completed ? styles.completedItem : styles.itemText}>
               {item.text}
             </Text>
-            <TouchableOpacity onPress={() => markAsCompleted(item.id)}>
+            <TouchableOpacity onPress={() => markAsCompleted(index)}>
               <Text style={styles.actionText}>✔️</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => deleteItem(item.id)}>
+            <TouchableOpacity onPress={() => deleteItem(index)}>
               <Text style={styles.actionText}>❌</Text>
             </TouchableOpacity>
           </View>
