@@ -56,11 +56,11 @@ const ListComponent: React.FC<ListComponentProps> = ({importedList}) => {
 
   // Function to get a random item
   const getRandomItem = () => {
-    if (list.length === 0) {
+    if (list.items.length === 0) {
       Alert.alert('Info', 'No items in the list!');
       return;
     }
-    const filteredList = list.filter(item => !item.completed);
+    const filteredList = list.items.filter(item => !item.completed);
     if (filteredList.length === 0) {
       Alert.alert('Info', 'No items in filtered list!');
       return;

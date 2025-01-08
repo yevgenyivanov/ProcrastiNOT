@@ -29,7 +29,8 @@ export class AbstractList {
             return this.date.toString();
         }
     }
-    
+
+    // deep copy
     static fromPlainObject(obj: any): AbstractList {
         const list = new AbstractList(obj.title);
         list.items = obj.items.map((item: any) => {
