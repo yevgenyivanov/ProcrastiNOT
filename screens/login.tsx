@@ -1,24 +1,76 @@
-import React, { useState } from 'react';
-import { View, Text } from 'react-native';
-import ListComponent from '../components/list';
-import { AbstractList,AbstractListItem } from '../utils/types';
+import React, { useState } from "react";
+import { View, Text, TextInput, Button, StyleSheet } from "react-native";
+import { registerUser, loginUser } from "../services/api";
+import { useAuth } from "../context/AuthContext";
 
 const LoginScreen = () => {
-  const testItem1 = new AbstractListItem('item 1');
-  const testItem2 = new AbstractListItem('item 2');
-  const testItem3 = new AbstractListItem('item 3');
-  const testList = new AbstractList('testList');
-  testList.items.push(testItem1);
-  testList.items.push(testItem2);
-  testList.items.push(testItem3);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const { userToken, storeToken } = useAuth();
+
+  const handleLogin = () => {
+    loginUser(email, password)
+      .then((response) => {
+        console.log("Login successful", response);
+        storeToken(response.token);
+      })
+      .catch((error) => {
+        console.error("Login failed", error);
+      });
+  };
+
+  const handleRegister = () => {
+    registerUser(email, password)
+      .then((response) => {
+        console.log("Registration successful", response);
+      })
+      .catch((error) => {
+        console.error("Registration failed", error);
+      });
+  };
 
   return (
-    <View style={{flex: 1}}>
-      <Text>login screen</Text>
-      <ListComponent
-        importedList={testList}/>
+    <View style={styles.container}>
+      <Text style={styles.title}>Login</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Email"
+        value={email}
+        onChangeText={setEmail}
+        keyboardType="email-address"
+        autoCapitalize="none"
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Password"
+        value={password}
+        onChangeText={setPassword}
+        secureTextEntry
+      />
+      <Button title="Login" onPress={handleLogin} />
+      <Button title="Register" onPress={handleRegister} />
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    padding: 16,
+  },
+  title: {
+    fontSize: 24,
+    marginBottom: 16,
+    textAlign: "center",
+  },
+  input: {
+    height: 40,
+    borderColor: "gray",
+    borderWidth: 1,
+    marginBottom: 12,
+    paddingHorizontal: 8,
+  },
+});
 
 export default LoginScreen;
