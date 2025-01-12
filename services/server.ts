@@ -185,6 +185,7 @@ app.post(
 
       user.abstractLists.push(newList);
       await user.save();
+      
 
       res.status(201).json({ message: "Abstract list added successfully" });
     } catch (error) {
@@ -218,45 +219,45 @@ app.put("/abstract-lists/:id", authenticate, async (req, res) => {
 });
 
 // PUT /abstract-lists - Override user's AbstractLists
-app.put(
-  "/abstract-lists",
-  authenticate,
-  async (req: express.Request, res: express.Response) => {
-    try {
-      const user = res.locals.user;
+// app.put(
+//   "/abstract-lists",
+//   authenticate,
+//   async (req: express.Request, res: express.Response) => {
+//     try {
+//       const user = res.locals.user;
 
-      if (!user) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
+//       if (!user) {
+//         return res.status(401).json({ message: "Unauthorized" });
+//       }
 
-      const { abstractLists } = req.body;
-      console.log(abstractLists);
-      // Validate the input
-      if (!Array.isArray(abstractLists)) {
-        return res.status(400).json({ message: "Invalid input" });
-      }
+//       const { abstractLists } = req.body;
+//       console.log(abstractLists);
+//       // Validate the input
+//       if (!Array.isArray(abstractLists)) {
+//         return res.status(400).json({ message: "Invalid input" });
+//       }
 
-      // Override the existing abstractLists
-      user.abstractLists = abstractLists.map((list: any) => ({
-        title: list.title,
-        items: list.items.map((item: any) => ({
-          text: item.text,
-          desc: item.desc,
-          date: new Date(item.date),
-          completed: item.completed,
-        })),
-        date: new Date(list.date),
-      }));
+//       // Override the existing abstractLists
+//       user.abstractLists = abstractLists.map((list: any) => ({
+//         title: list.title,
+//         items: list.items.map((item: any) => ({
+//           text: item.text,
+//           desc: item.desc,
+//           date: new Date(item.date),
+//           completed: item.completed,
+//         })),
+//         date: new Date(list.date),
+//       }));
 
-      await user.save();
+//       await user.save();
 
-      res.status(200).json({ message: "Abstract lists overridden successfully" });
-    } catch (error) {
-      console.error("Error overriding abstract lists:", error);
-      res.status(500).json({ message: "Server error" });
-    }
-  }
-);
+//       res.status(200).json({ message: "Abstract lists overridden successfully" });
+//     } catch (error) {
+//       console.error("Error overriding abstract lists:", error);
+//       res.status(500).json({ message: "Server error" });
+//     }
+//   }
+// );
 
 // DELETE /abstract-lists/:id - Delete an AbstractList
 // app.delete("/abstract-lists/:id", authenticate, async (req, res) => {

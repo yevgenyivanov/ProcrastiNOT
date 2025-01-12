@@ -89,13 +89,13 @@ export const addNewList = async (
   token: string | null,
   title: string,
   items: AbstractListItem[]
-): Promise<{ id: string }> => {
+): Promise<{ message: string }> => {
   try {
     if (!token) {
       throw new Error("No token provided");
     }
     
-    const response = await axios.post<{ id: string }>(
+    const response = await axios.post<{ message: string }>(
       `${API_URL}/abstract-lists`,
       { title, items },
       {

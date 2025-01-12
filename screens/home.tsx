@@ -1,69 +1,105 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, Button, SafeAreaView, FlatList } from 'react-native';
-import ListComponent from '../components/list';
-import { AbstractList,AbstractListItem } from '../utils/types';
-import {useAuth} from '../context/AuthContext';
-import { fetchAllLists, addNewList,overrideAllLists } from '@/services/api';
-import { ScrollView } from 'react-native-gesture-handler';
+import React, { useEffect, useState } from "react";
+import { View, Text, Button, SafeAreaView, FlatList } from "react-native";
+import ListComponent from "../components/ListComponent";
+import { AbstractList, AbstractListItem } from "../utils/types";
+import { useAuth } from "../context/AuthContext";
+import {
+  fetchAllLists,
+  addNewList,
+  updateExistingList,
+} from "@/services/api";
+import { ScrollView } from "react-native-gesture-handler";
+import { create } from "axios";
+import { NavigationProp, ParamListBase } from '@react-navigation/native';
 
-const HomeScreen = () => {
+interface HomeScreenProps {
+  navigation: NavigationProp<ParamListBase>;
+}
 
-  const {userToken,clearUserToken} = useAuth();
-  const [lists,setLists] = useState<AbstractList[]>([]);
+const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
+  const { userToken, clearUserToken } = useAuth();
+  const [lists, setLists] = useState<AbstractList[]>([]);
 
-  // const testItem1 = new AbstractListItem('item 1');
-  // const testItem2 = new AbstractListItem('item 2');
-  // const testItem3 = new AbstractListItem('item 3');
-  // const testList = new AbstractList('testList');
-  // testList.items.push(testItem1);
-  // testList.items.push(testItem2);
-  // testList.items.push(testItem3);
-
-  // addNewList(userToken,'testList',[testItem1,testItem2,testItem3]);
-
-  const getLists  = async () => {
-    fetchAllLists(userToken).then((lists) => {
-      const plainLists = lists.map(list => AbstractList.fromPlainObject(list));
-      console.log(plainLists[0].title);
-      console.log(plainLists[0].date);
-      setLists(plainLists);
-    }).catch((error) => {
-      console.error(error);
-    });
-  }
-
-  const saveLists = () => {
-    console.log(lists[0].items);
-    overrideAllLists(userToken, lists).then(response => {
-      console.log(response);
-    }).catch(error => {
-      console.error(error);
-    });
-  }
-
-  const updateList = (updatedList: AbstractList, index: number) => {
-    setLists(prevLists => {
-      const newLists = [...prevLists];
-      newLists[index] = updatedList;
-      console.log(newLists);
-      return newLists;
-    });
+  const fetchUserLists = async () => {
+    fetchAllLists(userToken)
+      .then((lists) => {
+        const plainLists = lists.map((list) =>
+          AbstractList.parseMongoDBObject(list)
+        );
+        setLists(plainLists);
+        console.log("FETCHING LISTS");
+        console.log(plainLists);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
   };
 
 
-  useEffect(() => {
-    getLists();
-  },[]);
+  const updateAndSyncList = (updatedList: AbstractList, index: number) => {
+    if (index >= lists.length || index < 0) return;
+    setLists((prevLists) => {
+      const newLists = [...prevLists];
+      newLists[index] = updatedList;
+      if (newLists[index].id) { 
+        // If the list has a MongoDB ID, we send an API request to update the list
+        // and then update the state to represent the updated list
+        updateExistingList(
+          userToken,
+          newLists[index].id,
+          newLists[index].title,
+          newLists[index].items
+        );
+        return newLists;
+      }
+      return prevLists;
+    });
+  };
+
+  const createNewList = () => {
+    addNewList(userToken, "New List", []).then(() => fetchUserLists())
+  }
+
+  const handleLogOut = () => {
+    clearUserToken();
+    navigation.navigate("Login");
+  }
   
+  useEffect(() => {
+    if(userToken){
+      fetchUserLists();
+    }else{
+      navigation.navigate("Login");
+    }
+  }, [userToken]);
+
   return (
-    <SafeAreaView style={{justifyContent:'center',alignItems:'center',flex:1,margin: 20,}}>
-      <Button title="Logout" onPress={clearUserToken}/>
-      <Button title="Add List" onPress={() => addNewList(userToken,'New List',[]).then(() => getLists())}/>
-      <Button title="Save Lists" onPress={() => saveLists()}></Button>
+    <SafeAreaView
+      style={{
+        justifyContent: "center",
+        alignItems: "center",
+        flex: 1,
+        margin: 20,
+      }}
+    >
+      <Button title="Logout" onPress={handleLogOut} />
+      <Button
+        title="Add List"
+        onPress={() =>
+          createNewList()
+        }
+      />
+      {/* <Button title="Save Lists" onPress={() => sync()}></Button> */}
       <FlatList
         data={lists}
         keyExtractor={(item, index) => index.toString()}
-        renderItem={({ item,index }) => <ListComponent index={index} importedList={item} updateList={updateList}/>}
+        renderItem={({ item, index }) => (
+          <ListComponent
+            listIndex={index}
+            sourceList={item}
+            updateAndSyncList={updateAndSyncList}
+          />
+        )}
       />
     </SafeAreaView>
   );

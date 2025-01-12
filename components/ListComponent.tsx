@@ -15,13 +15,13 @@ import {useAuth} from '../context/AuthContext';
 // TODO: notifications, get random item can return completed item, list class
 
 interface ListComponentProps {
-  importedList: AbstractList;
-  updateList: (updatedList: AbstractList, index: number) => void;
-  index: number;
+  sourceList: AbstractList;
+  updateAndSyncList: (updatedList: AbstractList, index: number) => void;
+  listIndex: number;
 }
 
-const ListComponent: React.FC<ListComponentProps> = ({ importedList,index,updateList }) => {
-  const [list, setList] = useState<AbstractList>(importedList);
+const ListComponent: React.FC<ListComponentProps> = ({ sourceList,listIndex,updateAndSyncList}) => {
+  const [list, setList] = useState<AbstractList>(sourceList);
   const [inputValue, setInputValue] = useState<string>("");
   const [date, setDate] = useState<Date | null>(null);
   const [progress, setProgress] = useState<number>(0);
@@ -64,7 +64,7 @@ const ListComponent: React.FC<ListComponentProps> = ({ importedList,index,update
     setList(newList);
     setInputValue("");
     updateProgress(newList.items);
-    updateList(newList,index);
+    updateAndSyncList(newList,listIndex);
   };
 
   // Function to get a random item
@@ -93,7 +93,7 @@ const ListComponent: React.FC<ListComponentProps> = ({ importedList,index,update
     });
     setList(updatedList);
     updateProgress(updatedItems);
-    updateList(updatedList,index);
+    updateAndSyncList(updatedList,listIndex);
   };
 
   // Function to mark an item as completed
@@ -106,7 +106,7 @@ const ListComponent: React.FC<ListComponentProps> = ({ importedList,index,update
     });
     setList(updatedList);
     updateProgress(updatedItems);
-    updateList(updatedList,index);
+    updateAndSyncList(updatedList,listIndex);
   };
 
   // Function to set notification frequency

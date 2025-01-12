@@ -1,9 +1,14 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import { View, Text, TextInput, Button, StyleSheet } from "react-native";
 import { registerUser, loginUser } from "../services/api";
 import { useAuth } from "../context/AuthContext";
+import { NavigationProp, ParamListBase } from '@react-navigation/native';
 
-const LoginScreen = () => {
+interface LoginScreenProps {
+  navigation: NavigationProp<ParamListBase>;
+}
+
+const LoginScreen: React.FC<LoginScreenProps> = ({navigation}) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const { userToken, storeToken } = useAuth();
@@ -28,6 +33,13 @@ const LoginScreen = () => {
         console.error("Registration failed", error);
       });
   };
+
+  //If a user token is obtained, navigate to the Home screen
+  useEffect(() => {
+    if (userToken) {
+      navigation.navigate("Home");
+    };
+  }, [userToken]);
 
   return (
     <View style={styles.container}>

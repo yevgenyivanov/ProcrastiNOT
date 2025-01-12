@@ -15,7 +15,7 @@ type RootStackParamList = {
 const Stack = createStackNavigator<RootStackParamList>();
 
 const AppContent: React.FC = () => {
-  const { userToken, storeToken, extractToken } = useAuth();
+  const {extractToken } = useAuth();
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
@@ -34,20 +34,17 @@ const AppContent: React.FC = () => {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator>
-        {userToken ? (
-          <Stack.Screen
-            name="Home"
-            component={HomeScreen}
-            options={{ headerShown: false }}
-          />
-        ) : (
-          <Stack.Screen
-            name="Login"
-            component={LoginScreen}
-            options={{ headerShown: false }}
-          />
-        )}
+      <Stack.Navigator initialRouteName="Home">
+        <Stack.Screen
+          name="Login"
+          component={LoginScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Home"
+          component={HomeScreen}
+          options={{ headerShown: false }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
