@@ -39,13 +39,13 @@ const AppContent: React.FC = () => {
           <Stack.Screen
             name="Home"
             component={HomeScreen}
-            options={{ headerShown: true }}
+            options={{ headerShown: false }}
           />
         ) : (
           <Stack.Screen
             name="Login"
             component={LoginScreen}
-            options={{ headerShown: true }}
+            options={{ headerShown: false }}
           />
         )}
       </Stack.Navigator>

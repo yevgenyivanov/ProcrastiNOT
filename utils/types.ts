@@ -9,14 +9,24 @@ export class AbstractListItem {
         this.date = new Date();
         this.completed = false;
     }
+
+    static fromPlainObject(obj: any): AbstractListItem {
+        const listItem = new AbstractListItem(obj.text);
+        listItem.desc = obj.desc;
+        listItem.completed = obj.completed;
+        listItem.date = new Date(obj.date);
+        return listItem;
+      }
 }
 
 export class AbstractList {
+    id: string;
     title: string;
     items: AbstractListItem[];
     date: Date;
 
-    constructor(title: string) {
+    constructor(title: string, id: string = "") {
+        this.id = id;
         this.title = title;
         this.items = [];
         this.date = new Date();
