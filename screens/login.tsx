@@ -1,6 +1,6 @@
 import React, { useState,useEffect } from "react";
 import { View, Text, TextInput, Button, StyleSheet } from "react-native";
-import { registerUser, loginUser } from "../services/api";
+import { registerUser, loginUser } from "../api";
 import { useAuth } from "../context/AuthContext";
 import { NavigationProp, ParamListBase } from '@react-navigation/native';
 
@@ -11,13 +11,16 @@ interface LoginScreenProps {
 const LoginScreen: React.FC<LoginScreenProps> = ({navigation}) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { userToken, storeToken } = useAuth();
+  const { userToken, storeToken, getUserObjectId,setUserObjectId, establishEventServerConnection} = useAuth();
 
   const handleLogin = () => {
     loginUser(email, password)
       .then((response) => {
-        console.log("Login successful", response);
+        console.log("Login successful", response.token);
+        console.log("User ID:", response.userID);
         storeToken(response.token);
+        setUserObjectId(response.userID);
+        establishEventServerConnection(response.userID,response.token);
       })
       .catch((error) => {
         console.error("Login failed", error);
@@ -42,8 +45,8 @@ const LoginScreen: React.FC<LoginScreenProps> = ({navigation}) => {
   }, [userToken]);
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Login</Text>
+    <View style={styles.container} testID="login-screen">
+      <Text style={styles.title}>ProcrastiNOT</Text>
       <TextInput
         style={styles.input}
         placeholder="Email"
@@ -59,8 +62,8 @@ const LoginScreen: React.FC<LoginScreenProps> = ({navigation}) => {
         onChangeText={setPassword}
         secureTextEntry
       />
-      <Button title="Login" onPress={handleLogin} />
-      <Button title="Register" onPress={handleRegister} />
+      <Button testID="login-button" title="Login" onPress={handleLogin} />
+      <Button testID="register-button" title="Register" onPress={handleRegister} />
     </View>
   );
 };

@@ -7,6 +7,7 @@ interface LoginRequest {
 
 interface LoginResponse {
   token: string;
+  userID: string;
 }
 
 interface RegisterRequest {
@@ -85,7 +86,7 @@ export const fetchAllLists = async (token: string | null): Promise<AbstractList[
 };
 
 // Add a new abstract list for the logged-in user
-export const addNewList = async (
+export const createList = async (
   token: string | null,
   title: string,
   items: AbstractListItem[]
@@ -138,7 +139,7 @@ export const updateExistingList = async (
 
 // Delete an abstract list
 export const deleteExistingList = async (
-  token: string,
+  token: string | null,
   listId: string
 ): Promise<{ message: string }> => {
   try {
@@ -179,3 +180,69 @@ export const overrideAllLists = async (
     throw new Error(error.response?.data?.message || "Failed to override lists");
   }
 };
+
+export const createCollabList = async ( 
+  token: string | null, 
+  title: string
+): Promise<{ message: string }> => {
+  try{
+    if(!token){
+      throw new Error("No token provided");
+    }
+    const response = await axios.post<{ message: string }>(
+      `${API_URL}/create-collab-list`,
+      { title },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  }catch(error: any){
+    throw new Error(error.response?.data?.message || "Failed to create collab list");
+  }
+};
+
+// FIXME: Data needs to be parsed to the correct type AbstractCollabList (new type inherited from AbstractList)
+//
+export const fetchAllCollabLists = async ( 
+  token: string | null, 
+): Promise<{ message: string }> => {
+  try{
+    if(!token){
+      throw new Error("No token provided");
+    }
+    const response = await axios.get<{ message: string }>(
+      `${API_URL}/get-all-collab-lists`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  }catch(error: any){
+    throw new Error(error.response?.data?.message || "Failed to create collab list");
+  }
+};
+export const fetchCollabListsIds = async (token: string | null): Promise<string[]> => {
+  try {
+    if (!token) {
+      throw new Error("No token provided");
+    }
+    const response = await axios.get<string[]>(
+      `${API_URL}/get-collab-lists-ids`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || "Failed to fetch collab list IDs");
+  }
+};
+
+

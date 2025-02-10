@@ -9,8 +9,9 @@ import {
   StyleSheet,
 } from "react-native";
 import { AbstractList, AbstractListItem } from "../utils/types";
-import { updateExistingList } from "@/services/api";
+import { updateExistingList } from "@/api";
 import {useAuth} from '../context/AuthContext';
+import { LinearGradient } from 'expo-linear-gradient';
 
 // TODO: notifications, get random item can return completed item, list class
 
@@ -116,22 +117,25 @@ const ListComponent: React.FC<ListComponentProps> = ({ sourceList,listIndex,upda
   };
 
   return (
-    <View style={styles.container}>
-
-      <Text>{list.title ? list.title : ""}</Text>
+    <LinearGradient 
+    colors={["#EC6F66", "#F3A183"]}
+    style={styles.container}
+    >
+      <Text style={styles.title}>{list.title ? list.title : ""}</Text>
       <Text style={styles.subTitle}>
         Created on: {date ? date.toString() : ""}
       </Text>
+
       <View
         style={{
-          marginBottom: 30,
           flexDirection: "row",
           justifyContent: "space-between",
           alignItems: "flex-start",
         }}
       >
+        
         <Text style={styles.progress}>Progress: {progress.toFixed(1)}%</Text>
-        <TouchableOpacity style={styles.randomButton} onPress={getRandomItem}>
+        {/* <TouchableOpacity style={styles.randomButton} onPress={getRandomItem}>
           <Text style={styles.buttonText}>Get Random Item</Text>
         </TouchableOpacity>
 
@@ -140,24 +144,26 @@ const ListComponent: React.FC<ListComponentProps> = ({ sourceList,listIndex,upda
           onPress={() => setNotification("Every Saturday")}
         >
           <Text style={styles.buttonText}>Set Weekly Notification</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
 
+
       {/* Add Item Input */}
+      <View style={{ flexDirection: "row-reverse" }}>
+        <TextInput
+          style={styles.input}
+          placeholder="הוסף לרשימה"
+          value={inputValue}
+          onChangeText={setInputValue}
+        />
 
-      <TextInput
-        style={styles.input}
-        placeholder="Add a new item"
-        value={inputValue}
-        onChangeText={setInputValue}
-      />
-
-      <TouchableOpacity
-        style={styles.addButton}
-        onPress={() => addItem(inputValue)}
-      >
-        <Text style={styles.buttonText}>Add Item</Text>
-      </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.addButton}
+          onPress={() => addItem(inputValue)}
+        >
+          <Text style={styles.buttonText}>הוספה</Text>
+        </TouchableOpacity>
+      </View>
 
       {/* List of Items */}
       <FlatList
@@ -179,7 +185,7 @@ const ListComponent: React.FC<ListComponentProps> = ({ sourceList,listIndex,upda
           </View>
         )}
       />
-    </View>
+    </LinearGradient>
   );
 };
 
@@ -189,18 +195,22 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     flexDirection: "column",
     flex: 1,
+    padding: 10,
+    borderRadius: 20,
+    marginVertical: 10,
   },
   title: {
     justifyContent: "center",
     alignItems: "center",
     fontSize: 24,
-    color: "#555",
-    fontWeight: "bold",
+    color: "white",
+    textAlign: "right"
     // marginBottom: 10,
   },
   subTitle: {
     fontSize: 14,
-    color: "#555",
+    color: "white",
+    opacity: 0.5,
     marginBottom: 20,
   },
   progress: {
@@ -209,23 +219,30 @@ const styles = StyleSheet.create({
     textAlign:'center',
   },
   input: {
+    flex: 1,
     height: 40,
-    borderColor: "#6200ee",
+    borderColor: "lightgrey",
+    textAlign: "right",
+    paddingRight: 10,
     color: "black",
+    backgroundColor: "white",
     borderWidth: 1,
-    borderRadius: 5,
+    borderTopRightRadius: 10,
+    borderBottomRightRadius: 10,
     // padding: 10,
     marginBottom: 10,
   },
   addButton: {
+    height: 40,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#6200ee",
+    backgroundColor: "lightgrey",
+    borderTopLeftRadius: 10,
+    borderBottomLeftRadius: 10,
     padding: 10,
-    borderRadius: 5,
   },
   buttonText: {
-    fontSize: 8,
+    fontSize: 10,
     color: "black",
     fontWeight: "bold",
   },

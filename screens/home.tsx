@@ -5,19 +5,22 @@ import { AbstractList, AbstractListItem } from "../utils/types";
 import { useAuth } from "../context/AuthContext";
 import {
   fetchAllLists,
-  addNewList,
+  createList,
   updateExistingList,
-} from "@/services/api";
+  createCollabList,
+  fetchAllCollabLists,
+} from "@/api";
 import { ScrollView } from "react-native-gesture-handler";
-import { create } from "axios";
-import { NavigationProp, ParamListBase } from '@react-navigation/native';
+import { create, get } from "axios";
+import { NavigationProp, ParamListBase } from "@react-navigation/native";
+import { io } from "socket.io-client";
 
 interface HomeScreenProps {
   navigation: NavigationProp<ParamListBase>;
 }
 
-const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
-  const { userToken, clearUserToken } = useAuth();
+const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
+  const { userToken, clearUserToken,closeEventServerConnection } = useAuth();
   const [lists, setLists] = useState<AbstractList[]>([]);
 
   const fetchUserLists = async () => {
@@ -27,21 +30,18 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
           AbstractList.parseMongoDBObject(list)
         );
         setLists(plainLists);
-        console.log("FETCHING LISTS");
-        console.log(plainLists);
       })
       .catch((error) => {
         console.error(error);
       });
   };
 
-
   const updateAndSyncList = (updatedList: AbstractList, index: number) => {
     if (index >= lists.length || index < 0) return;
     setLists((prevLists) => {
       const newLists = [...prevLists];
       newLists[index] = updatedList;
-      if (newLists[index].id) { 
+      if (newLists[index].id) {
         // If the list has a MongoDB ID, we send an API request to update the list
         // and then update the state to represent the updated list
         updateExistingList(
@@ -57,20 +57,23 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
   };
 
   const createNewList = () => {
-    addNewList(userToken, "New List", []).then(() => fetchUserLists())
-  }
+    createList(userToken, "New List", []).then(() => fetchUserLists());
+  };
 
   const handleLogOut = () => {
     clearUserToken();
+    closeEventServerConnection();
     navigation.navigate("Login");
-  }
-  
+  };
+
+
+
   useEffect(() => {
-    if(userToken){
-      fetchUserLists();
-    }else{
+    if(!userToken) {
       navigation.navigate("Login");
-    }
+      return;
+    };
+    fetchUserLists();
   }, [userToken]);
 
   return (
@@ -83,11 +86,14 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
       }}
     >
       <Button title="Logout" onPress={handleLogOut} />
+      <Button title="Add List" onPress={() => createNewList()} />
       <Button
-        title="Add List"
-        onPress={() =>
-          createNewList()
-        }
+        title="Create Collab list"
+        onPress={() => createCollabList(userToken, "CollabList")}
+      />
+      <Button
+        title="Fetch Collab Lists"
+        onPress={() => fetchAllCollabLists(userToken)}
       />
       {/* <Button title="Save Lists" onPress={() => sync()}></Button> */}
       <FlatList
