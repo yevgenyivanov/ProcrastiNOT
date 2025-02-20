@@ -6,7 +6,7 @@ import {
   addAbstractList,
   updateAbstractList,
 } from "./abstractListController";
-import { updateCollabList, getCollabList, createCollabList, fetchAllCollabLists,fetchCollabListsIds } from "./collabListController";
+import { updateCollabList, getCollabList, createCollabList, fetchAllCollabLists,fetchCollabListsIds,joinCollabList,updateRandomItem } from "./collabListController";
 import { authenticate } from "./middleware";
 import { SERVER_PORT } from "./config";
 import { Server } from "socket.io";
@@ -34,19 +34,14 @@ app.get("/get-collab-lists-ids", authenticate, fetchCollabListsIds);
 app.get("/get-all-collab-lists", authenticate, fetchAllCollabLists);
 app.get("/get-collab-list/:id", authenticate, getCollabList);
 app.put("/update-collab-list/:id", authenticate, updateCollabList);
+app.put("/join-collab-list", authenticate, joinCollabList);
 
+app.put("/update-random-item/:id", authenticate, updateRandomItem);
 
 // 📀 SOCKET.IO API 📀
 
 const users: { [key: string]: { userId: string, listIds: string[] } } = {};
 const lists: { [listId: string]: string[] } = {};
-
-// TODO: We need to create some function that executes once a user updates a collab lists. The function looks at the lists object and emits some event that includes the updated listId to all sockets in that list. 
-
-// # Once a collab list updates, an end user recieves the emitted event with the out-of-sync listId, which causes him to fetch the updated list from the server.
-
-//TODO: Once a user disconnects, use his socket to gather all his listIds and remove his socket from the lists object.
-//If that listId has no more sockets, delete the listId from the lists object.
 
 
 io.on("connection", (socket) => {

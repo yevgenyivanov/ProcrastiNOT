@@ -71,7 +71,7 @@ const JoinCollabListSection: React.FC<JoinCollabListSectionProps> = ({
         <View style={styles.row}>
           <View style={styles.flex}>
             <TextInput
-              placeholder="Enter link.."
+              placeholder="Enter invite code"
               keyboardType="default"
               onChangeText={setNewLink}
               value={link}

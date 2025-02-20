@@ -1,5 +1,5 @@
-import React, { useState,useEffect } from "react";
-import { View, Text, TextInput, Button, StyleSheet } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import { registerUser, loginUser } from "../api";
 import { useAuth } from "../context/AuthContext";
 import { NavigationProp, ParamListBase } from '@react-navigation/native';
@@ -8,10 +8,10 @@ interface LoginScreenProps {
   navigation: NavigationProp<ParamListBase>;
 }
 
-const LoginScreen: React.FC<LoginScreenProps> = ({navigation}) => {
+const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { userToken, storeToken, getUserObjectId,setUserObjectId, establishEventServerConnection} = useAuth();
+  const { userToken, storeToken, getUserObjectId, setUserObjectId, establishEventServerConnection } = useAuth();
 
   const handleLogin = () => {
     loginUser(email, password)
@@ -20,7 +20,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({navigation}) => {
         console.log("User ID:", response.userID);
         storeToken(response.token);
         setUserObjectId(response.userID);
-        establishEventServerConnection(response.userID,response.token);
+        establishEventServerConnection(response.userID, response.token);
       })
       .catch((error) => {
         console.error("Login failed", error);
@@ -37,12 +37,13 @@ const LoginScreen: React.FC<LoginScreenProps> = ({navigation}) => {
       });
   };
 
-  //If a user token is obtained, navigate to the Home screen
+  // If a user token is obtained, navigate to the Home screen
   useEffect(() => {
     if (userToken) {
       navigation.navigate("Home");
-    };
+    }
   }, [userToken]);
+
 
   return (
     <View style={styles.container} testID="login-screen">
@@ -62,8 +63,15 @@ const LoginScreen: React.FC<LoginScreenProps> = ({navigation}) => {
         onChangeText={setPassword}
         secureTextEntry
       />
-      <Button testID="login-button" title="Login" onPress={handleLogin} />
-      <Button testID="register-button" title="Register" onPress={handleRegister} />
+      <TouchableOpacity style={styles.button} onPress={handleLogin} testID="login-button">
+        <Text style={styles.buttonText}>Login</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={[styles.button, styles.registerButton]} onPress={handleRegister} testID="register-button">
+        <Text style={styles.buttonText}>Register</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={[styles.button, {backgroundColor:"red"}]} onPress={() => Alert.alert("Sign Up with Google")} testID="google-signup-button">
+        <Text style={styles.buttonText}>Sign Up with Google</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -72,19 +80,42 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "center",
+    alignItems: "center",
     padding: 16,
+    backgroundColor: "#f5f5f5",
   },
   title: {
-    fontSize: 24,
-    marginBottom: 16,
-    textAlign: "center",
+    fontSize: 32,
+    fontWeight: "bold",
+    marginBottom: 32,
+    color: "#333",
   },
   input: {
-    height: 40,
-    borderColor: "gray",
+    width: "100%",
+    height: 50,
+    borderColor: "#ccc",
     borderWidth: 1,
-    marginBottom: 12,
-    paddingHorizontal: 8,
+    borderRadius: 8,
+    marginBottom: 16,
+    paddingHorizontal: 16,
+    backgroundColor: "#fff",
+  },
+  button: {
+    width: "100%",
+    height: 50,
+    backgroundColor: "#007BFF",
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  registerButton: {
+    backgroundColor: "#28a745",
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "bold",
   },
 });
 

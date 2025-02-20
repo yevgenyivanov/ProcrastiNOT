@@ -6,14 +6,14 @@ import {
   TouchableOpacity,
   FlatList,
   Alert,
-  StyleSheet,
+  StyleSheet
 } from "react-native";
 import { AbstractList, AbstractListItem, CollabList } from "../utils/types";
-import { updateExistingList } from "@/api";
+import { updateExistingList,updateRandomItem } from "@/api";
 import { useAuth } from "../context/AuthContext";
 import { LinearGradient } from "expo-linear-gradient";
+import * as Clipboard from 'expo-clipboard';
 
-// TODO: notifications, get random item can return completed item, list class
 
 interface CollabListComponentProps {
   sourceList: CollabList;
@@ -84,9 +84,8 @@ const CollabListComponent: React.FC<CollabListComponentProps> = ({
       Alert.alert("Info", "No items in filtered list!");
       return;
     }
-    const randomItem =
-      filteredList[Math.floor(Math.random() * filteredList.length)];
-    Alert.alert("Random Item", randomItem.text);
+    const randomItem = filteredList[Math.floor(Math.random() * filteredList.length)];
+    return randomItem;
   };
 
   // Function to delete an item
@@ -115,10 +114,18 @@ const CollabListComponent: React.FC<CollabListComponentProps> = ({
     updateAndSyncList(updatedList, listIndex);
   };
 
-  // Function to set notification frequency
-  const setNotification = (frequency: string) => {
-    setNotificationFrequency(frequency);
-    Alert.alert("Notification Set", `Reminder set to: ${frequency}`);
+
+  const copyToClipboard = async (text: string) => {
+    await Clipboard.setStringAsync(text);
+  };
+  
+  const handleRandomItem = () => {
+    const randomItem = getRandomItem();
+
+    if(!randomItem) return;
+    if(!userToken) return;
+    if(!list.id) return;
+    updateRandomItem(userToken, list.id, randomItem.text);
   };
 
   return (
@@ -151,24 +158,34 @@ const CollabListComponent: React.FC<CollabListComponentProps> = ({
       <Text style={styles.subTitle}>
         Opened by: {list.owner ? list.owner : "Unknown"}{" "}
       </Text>
+      <View style={{ flexDirection: "row", alignItems: "flex-start",justifyContent:'flex-start'}}>
+        <Text style={[styles.subTitle]}>
+          Invite code: {list.id ? list.id : "Unknown"}{" "}
+        </Text>
+        <TouchableOpacity
+          onPress={() => {
+        if (list.id) {
+          copyToClipboard(list.id);
+        }
+          }}
+        >
+          <Text style={styles.copyButton}>Copy</Text>
+        </TouchableOpacity>
+      </View>
       <View
         style={{
           flexDirection: "row",
           justifyContent: "space-between",
           alignItems: "flex-start",
+          marginTop: 15,
         }}
       >
-        <Text style={styles.progress}>Progress: {progress.toFixed(1)}%</Text>
-        {/* <TouchableOpacity style={styles.randomButton} onPress={getRandomItem}>
-          <Text style={styles.buttonText}>Get Random Item</Text>
-        </TouchableOpacity>
-
+        <Text style={styles.progress}>📊 Progress: {progress.toFixed(1)}%</Text>
         <TouchableOpacity
-          style={styles.notificationButton}
-          onPress={() => setNotification("Every Saturday")}
+          onPress={() => {handleRandomItem()}}
         >
-          <Text style={styles.buttonText}>Set Weekly Notification</Text>
-        </TouchableOpacity> */}
+          <Text style={styles.copyButton}>🎲 Random Item</Text>
+        </TouchableOpacity>
       </View>
 
       {/* Add Item Input */}
@@ -228,7 +245,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "white",
     opacity: 0.5,
-    marginBottom: 20,
+    marginBottom: 10,
   },
   progress: {
     fontSize: 16,
@@ -269,7 +286,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     padding: 10,
     borderBottomWidth: 1,
-    borderBottomColor: "#ddd",
+    borderBottomColor: "black",
   },
   itemText: {
     fontSize: 16,
@@ -302,6 +319,14 @@ const styles = StyleSheet.create({
   textBlack: {
     color: "#000",
   },
+  copyButton: {
+    color: "white",
+    fontSize: 12,
+    padding: 5,
+    backgroundColor: "black",
+    borderRadius: 5,
+    marginLeft: 5,
+  }
 });
 
 export default CollabListComponent;

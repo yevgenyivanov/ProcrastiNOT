@@ -9,6 +9,8 @@ import React, {
 import * as SecureStore from "expo-secure-store";
 import { io, Socket } from "socket.io-client";
 import { fetchCollabListsIds,fetchAllCollabLists} from "../api";
+import * as Notifications from 'expo-notifications';
+import { CollabList } from "@/utils/types";
 
 
 interface AuthContextProps {
@@ -83,6 +85,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
       setTriggerSync((prev) => prev + 1);
     });
 
+    socket.on("random-item", ({ item,userId,collabListId }) => {
+      showNotification(item,userId,collabListId);
+    });
+
     if (serverEventSocket) {
       console.log(serverEventSocket);
       socket.on("connect_error", (err) => {
@@ -100,7 +106,50 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
   useEffect(() => {
     extractToken();
+    requestNotificationPremissions();
   }, []);
+
+    const showNotification = async (item: string,userId: string, collabListId: string) => {
+      try {
+        await Notifications.scheduleNotificationAsync({
+          content: {
+            title: `🐡 ProcrastiNOT: ${collabListId}`,
+            body: `🎲 ${userId} has drawn a random value: ${item} 🎲`,
+            sound: true,
+          },
+          trigger: null, // Show immediately
+        });
+      } catch (error) {
+        console.log("Notification error:", error);
+      }
+    };
+
+    Notifications.setNotificationHandler({
+      handleNotification: async () => ({
+        shouldShowAlert: true,
+        shouldPlaySound: false,
+        shouldSetBadge: false,
+      }),
+    });
+
+      async function requestNotificationPremissions() {
+        const { status: existingStatus } =
+          await Notifications.getPermissionsAsync();
+        let finalStatus = existingStatus;
+    
+        if (existingStatus !== "granted") {
+          const { status } = await Notifications.requestPermissionsAsync();
+          finalStatus = status;
+        }
+    
+        if (finalStatus !== "granted") {
+          alert("Failed to get push token for notifications!");
+          return false;
+        }
+    
+        return true;
+      }
+    
 
   return (
     <AuthContext.Provider

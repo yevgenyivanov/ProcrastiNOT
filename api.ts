@@ -282,6 +282,52 @@ export const updateCollabList = async (
   }
 };
 
+export const joinCollabList = async (
+  token: string | null,
+  collabListId: string
+): Promise<{ message: string }> => {
+  try {
+    if (!token) {
+      throw new Error("No token provided");
+    }
+    const response = await axios.put<{ message: string }>(
+      `${API_URL}/join-collab-list`,
+      { collabListId },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || "Failed to join collab list");
+  }
+}
+
+export const updateRandomItem = async (
+  token: string | null,
+  collabListId: string,
+  item: string
+): Promise<{ message: string }> => {
+  try {
+    if (!token) {
+      throw new Error("No token provided");
+    }
+    const response = await axios.put<{ message: string }>(
+      `${API_URL}/update-random-item/${collabListId}`,
+      { item },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || "Failed to update random item");
+  }
+}
 
 
 
