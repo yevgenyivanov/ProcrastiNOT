@@ -10,8 +10,7 @@ import { updateCollabList, getCollabList, createCollabList, fetchAllCollabLists,
 import { authenticate } from "./middleware";
 import { SERVER_PORT } from "./config";
 import { Server } from "socket.io";
-import { createServer } from "http";
-import axios from "axios";
+
 
 connectDB();
 
@@ -57,11 +56,6 @@ io.on("connection", (socket) => {
     socket.join(userId);
     users[socket.id] = { userId: userId,listIds: [] };
     console.log(`🔌 User ${users[socket.id].userId} joined from socket ${socket.id}`);
-    socket.on("say-hello", async (userId) => {
-      socket.join(userId);
-      users[socket.id] = { userId: userId,listIds: [] };
-      console.log(`🔌 User ${users[socket.id].userId} joined from socket ${socket.id}`);
-    });
   });
 
   socket.on("event-list", (listId) => {

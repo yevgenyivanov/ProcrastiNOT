@@ -34,7 +34,18 @@ interface AbstractList {
   id: string;
 }
 
+interface CollabList {
+  title: string;
+  items: AbstractListItem[];
+  date: Date;
+  id: string;
+  owner: string;
+  members: string[];
+}
+
 const API_URL = "http://localhost:3000"; // Adjust the URL if necessary
+// Android/Windows
+// const API_URL = "http://10.0.2.2:3000"; 
 
 // Login user
 export const loginUser = async (
@@ -208,12 +219,12 @@ export const createCollabList = async (
 //
 export const fetchAllCollabLists = async ( 
   token: string | null, 
-): Promise<{ message: string }> => {
+): Promise<CollabList[]> => {
   try{
     if(!token){
       throw new Error("No token provided");
     }
-    const response = await axios.get<{ message: string }>(
+    const response = await axios.get<CollabList[]>(
       `${API_URL}/get-all-collab-lists`,
       {
         headers: {
@@ -244,5 +255,33 @@ export const fetchCollabListsIds = async (token: string | null): Promise<string[
     throw new Error(error.response?.data?.message || "Failed to fetch collab list IDs");
   }
 };
+
+
+export const updateCollabList = async (
+  token: string | null,
+  collabListId: string,
+  title: string,
+  items: AbstractListItem[]
+): Promise<{ message: string }> => {
+  try {
+    if (!token) {
+      throw new Error("No token provided");
+    }
+    const response = await axios.put<{ message: string }>(
+      `${API_URL}/update-collab-list/${collabListId}`,
+      { title, items },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || "Failed to update list");
+  }
+};
+
+
 
 

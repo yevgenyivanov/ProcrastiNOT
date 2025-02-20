@@ -43,6 +43,7 @@ export const fetchAllCollabLists = async (req: Request, res: Response) => {
         _id: { $in: user.collabListIds },
         members: user._id
       });
+
       res.status(200).json(collabLists);
 
     } catch (error) {
@@ -96,6 +97,9 @@ export const updateCollabList = async (req: Request, res: Response) => {
     if(title) collabList.title = title;
     if(items) collabList.items = items;
     await collabList.save();
+
+    console.log(`[EVENT] Resyncing all users of the collab list ${id}`);
+    io.to(id).emit("list-updated", { id });
 
     res.status(200).json({ message: "Collab list updated successfully" });
   } catch (error) {

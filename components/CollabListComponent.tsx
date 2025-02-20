@@ -8,25 +8,25 @@ import {
   Alert,
   StyleSheet,
 } from "react-native";
-import { AbstractList, AbstractListItem } from "../utils/types";
+import { AbstractList, AbstractListItem, CollabList } from "../utils/types";
 import { updateExistingList } from "@/api";
 import { useAuth } from "../context/AuthContext";
 import { LinearGradient } from "expo-linear-gradient";
 
 // TODO: notifications, get random item can return completed item, list class
 
-interface ListComponentProps {
-  sourceList: AbstractList;
-  updateAndSyncList: (updatedList: AbstractList, index: number) => void;
+interface CollabListComponentProps {
+  sourceList: CollabList;
+  updateAndSyncList: (updatedList: CollabList, index: number) => void;
   listIndex: number;
 }
 
-const ListComponent: React.FC<ListComponentProps> = ({
+const CollabListComponent: React.FC<CollabListComponentProps> = ({
   sourceList,
   listIndex,
   updateAndSyncList,
 }) => {
-  const [list, setList] = useState<AbstractList>(sourceList);
+  const [list, setList] = useState<CollabList>(sourceList);
   const [inputValue, setInputValue] = useState<string>("");
   const [date, setDate] = useState<Date | null>(null);
   const [progress, setProgress] = useState<number>(0);
@@ -63,7 +63,7 @@ const ListComponent: React.FC<ListComponentProps> = ({
     const newItem = new AbstractListItem(text);
     // const newList = [...list, newItem];
 
-    const newList = AbstractList.fromPlainObject({
+    const newList = CollabList.fromPlainObject({
       ...list,
       items: [...list.items, newItem],
     });
@@ -93,7 +93,7 @@ const ListComponent: React.FC<ListComponentProps> = ({
   const deleteItem = (index: number) => {
     const updatedItems = [...list.items];
     updatedItems.splice(index, 1);
-    const updatedList = AbstractList.fromPlainObject({
+    const updatedList = CollabList.fromPlainObject({
       ...list,
       items: updatedItems,
     });
@@ -106,7 +106,7 @@ const ListComponent: React.FC<ListComponentProps> = ({
   const markAsCompleted = (index: number) => {
     const updatedItems = [...list.items];
     updatedItems[index].completed = !updatedItems[index].completed;
-    const updatedList = AbstractList.fromPlainObject({
+    const updatedList = CollabList.fromPlainObject({
       ...list,
       items: updatedItems,
     });
@@ -122,13 +122,13 @@ const ListComponent: React.FC<ListComponentProps> = ({
   };
 
   return (
-    <LinearGradient colors={["blue", "#fcb045"]} style={styles.container}>
+    <LinearGradient colors={["#833ab4", "#fcb045"]} style={styles.container}>
       {isEditingTitle ? (
         <TextInput
           style={styles.title}
           value={list.title}
           onChangeText={(text) =>
-            setList(AbstractList.fromPlainObject({ ...list, title: text }))
+            setList(CollabList.fromPlainObject({ ...list, title: text }))
           }
           onBlur={() => {
             setIsEditingTitle(false);
@@ -147,6 +147,9 @@ const ListComponent: React.FC<ListComponentProps> = ({
       )}
       <Text style={styles.subTitle}>
         Created on: {date ? date.toLocaleDateString() : ""}
+      </Text>
+      <Text style={styles.subTitle}>
+        Opened by: {list.owner ? list.owner : "Unknown"}{" "}
       </Text>
       <View
         style={{
@@ -167,11 +170,12 @@ const ListComponent: React.FC<ListComponentProps> = ({
           <Text style={styles.buttonText}>Set Weekly Notification</Text>
         </TouchableOpacity> */}
       </View>
+
       {/* Add Item Input */}
       <View style={{ flexDirection: "row" }}>
         <TextInput
           style={styles.input}
-          placeholder="Add new item.."
+          placeholder="Add new item..."
           value={inputValue}
           onChangeText={setInputValue}
         />
@@ -204,6 +208,7 @@ const ListComponent: React.FC<ListComponentProps> = ({
 // Styles
 const styles = StyleSheet.create({
   container: {
+    width: "100%",
     justifyContent: "center",
     flexDirection: "column",
     flex: 1,
@@ -299,4 +304,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ListComponent;
+export default CollabListComponent;

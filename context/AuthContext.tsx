@@ -8,11 +8,12 @@ import React, {
 // import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from "expo-secure-store";
 import { io, Socket } from "socket.io-client";
-import { fetchCollabListsIds } from "../api";
+import { fetchCollabListsIds,fetchAllCollabLists} from "../api";
 
 
 interface AuthContextProps {
   userToken: string | null;
+  triggerSync: number;
   storeToken: (token: string | null) => Promise<void>;
   extractToken: () => Promise<void>;
   clearUserToken: () => void;
@@ -30,6 +31,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   const [userToken, setUserToken] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [serverEventSocket, setServerEventSocket] = useState<Socket | null>(null);
+  const [triggerSync, setTriggerSync] = useState<number>(0);
 
   const clearUserToken = () => {
     SecureStore.deleteItemAsync("userToken");
@@ -57,13 +59,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   const setUserObjectId = (id: string) => {
     setUserId(id);
   }
-
-  const establishEventServerConnection = async (userId: string | null,userToken: string|null): Promise<void> => {
+  const establishEventServerConnection = async (userId: string | null, userToken: string | null): Promise<void> => {
     if (!userId) {
       console.error("User ID is null");
       return;
     }
     const socket = io("http://localhost:1234");
+    // In Android/Windows:
+    // const socket = io ("http://10.0.2.2:1234");
     socket.on("connect", () => {
       console.log("🔌 Connected to server");
       socket.emit("say-hello", userId);
@@ -74,11 +77,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
       });
       setServerEventSocket(socket);
     });
-    if(serverEventSocket) {
-      console.log(serverEventSocket)
+
+    socket.on("list-updated", ({ id }) => {
+      console.log(`[EVENT] List ${id} updated`);
+      setTriggerSync((prev) => prev + 1);
+    });
+
+    if (serverEventSocket) {
+      console.log(serverEventSocket);
       socket.on("connect_error", (err) => {
         console.error("Connection error:", err);
-
       });
     }
   };
@@ -96,7 +104,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
   return (
     <AuthContext.Provider
-      value={{ userToken, storeToken, extractToken, clearUserToken, getUserObjectId, setUserObjectId, establishEventServerConnection, closeEventServerConnection }}
+      value={{ userToken, triggerSync,storeToken, extractToken, clearUserToken, getUserObjectId, setUserObjectId, establishEventServerConnection, closeEventServerConnection }}
     >
       {children}
     </AuthContext.Provider>
