@@ -43,9 +43,9 @@ interface CollabList {
   members: string[];
 }
 
-const API_URL = "http://localhost:3000"; // Adjust the URL if necessary
+// const API_URL = "http://localhost:3000"; // Adjust the URL if necessary
 // Android/Windows
-// const API_URL = "http://10.0.2.2:3000"; 
+const API_URL = "http://10.0.2.2:3000"; 
 
 // Login user
 export const loginUser = async (
@@ -78,6 +78,10 @@ export const registerUser = async (
     throw new Error(error.response?.data?.message || "Registration failed");
   }
 };
+
+// Google login
+
+
 
 // Fetch all abstract lists for the logged-in user
 export const fetchAllLists = async (token: string | null): Promise<AbstractList[]> => {

@@ -4,14 +4,33 @@ import { registerUser, loginUser } from "../api";
 import { useAuth } from "../context/AuthContext";
 import { NavigationProp, ParamListBase } from '@react-navigation/native';
 
+import * as Google from "expo-auth-session/providers/google";
+import * as AuthSession from 'expo-auth-session';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { makeRedirectUri } from 'expo-auth-session';
+console.log(makeRedirectUri());
+
 interface LoginScreenProps {
   navigation: NavigationProp<ParamListBase>;
 }
 
 const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
+  //email login
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const { userToken, storeToken, getUserObjectId, setUserObjectId, establishEventServerConnection } = useAuth();
+
+  //google auth login
+  const [token, setToken] = useState("");
+  const [userInfo, setUserInfo] = useState(null);
+
+  const [request, response, promptAsync] = Google.useAuthRequest({
+    androidClientId: "24654489274-3s0s4l7asm2rdgegc5mchg38kuulmjh8.apps.googleusercontent.com",
+    iosClientId: "tbp",
+    
+    // webClientId: "",
+    
+  });
 
   const handleLogin = () => {
     loginUser(email, password)
@@ -37,6 +56,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
       });
   };
 
+
   // If a user token is obtained, navigate to the Home screen
   useEffect(() => {
     if (userToken) {
@@ -44,6 +64,52 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
     }
   }, [userToken]);
 
+
+  // If a google user token is obtained, navigate to Home screen
+  useEffect(() => {
+    handleGoogleSignIn()
+  }, [response, token]);
+
+  async function handleGoogleSignIn() {
+    const user = await getLocalUser();
+    console.log("user", user);
+    if (!user) {
+      if (response?.type === "success") {
+        // setToken(response.authentication.accessToken);
+        getUserInfo(response.authentication.accessToken);
+      }
+    } else {
+      setUserInfo(user);
+      console.log("loaded locally");
+    }
+  }
+
+  // debug func
+  const getLocalUser = async () => {
+    const data = await AsyncStorage.getItem("@user");
+    if (!data) return null;
+    return JSON.parse(data);
+  };
+
+  const getUserInfo = async (token) => {
+    if (!token) return;
+    try {
+      const response = await fetch(
+        "https://www.googleapis.com/userinfo/v2/me",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      const user = await response.json();
+      await AsyncStorage.setItem("@user", JSON.stringify(user));
+      setUserInfo(user);
+    } catch (error) {
+      // Add your own error handler here
+    }
+  };
+
+  
 
   return (
     <View style={styles.container} testID="login-screen">
@@ -69,8 +135,8 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
       <TouchableOpacity style={[styles.button, styles.registerButton]} onPress={handleRegister} testID="register-button">
         <Text style={styles.buttonText}>Register</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={[styles.button, {backgroundColor:"red"}]} onPress={() => Alert.alert("Sign Up with Google")} testID="google-signup-button">
-        <Text style={styles.buttonText}>Sign Up with Google</Text>
+      <TouchableOpacity style={[styles.button, {backgroundColor:"red"}]} disabled={!request} onPress={() => {promptAsync();}} testID="google-signup-button">
+        <Text style={styles.buttonText}>Sign In with Google</Text>
       </TouchableOpacity>
     </View>
   );
