@@ -33,6 +33,11 @@ import * as Notifications from "expo-notifications";
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import cameraTemp from "../assets/images/camera.jpg";
 
+
+// google sign out func
+import getLocalUser from "./login.tsx";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 interface HomeScreenProps {
   navigation: NavigationProp<ParamListBase>;
 }
@@ -118,6 +123,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const handleLogOut = () => {
     clearUserToken();
     closeEventServerConnection();
+    if (!AsyncStorage.getItem("@user")){
+      async() => await AsyncStorage.removeItem("@user");
+    }
     navigation.navigate("Login");
   };
 
