@@ -168,20 +168,51 @@ const ListComponent: React.FC<ListComponentProps> = ({
         </TouchableOpacity> */}
       </View>
       {/* Add Item Input */}
-      <View style={{ flexDirection: "row" }}>
-        <TextInput
-          style={styles.input}
-          placeholder="Add new item.."
-          value={inputValue}
-          onChangeText={setInputValue}
-        />
 
-        <TouchableOpacity
-          style={styles.addButton}
-          onPress={() => addItem(inputValue)}
-        >
-          <Text style={styles.buttonText}>+</Text>
-        </TouchableOpacity>
+      <View
+        style={{
+          justifyContent: "center",
+          alignItems: "center",
+          width: "100%",
+          backgroundColor: "white",
+          borderRadius: 10,
+          padding: 5,
+          borderWidth: 1,
+          borderColor: "lightgrey",
+          marginBottom: 10,
+        }}
+      >
+        <View style={{ flexDirection: "row" }}>
+          <View
+            style={{
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "flex-start",
+              paddingLeft: 10,
+            }}
+          >
+            <TextInput
+              placeholder="New item..."
+              keyboardType="default"
+              onChangeText={setInputValue}
+              value={inputValue}
+            />
+          </View>
+          <TouchableOpacity
+            onPress={() => addItem(inputValue)}
+            style={{
+              height: 40,
+              paddingHorizontal: 15,
+              justifyContent: "center",
+              alignItems: "center",
+              backgroundColor: "blue",
+              borderRadius: 10,
+              marginRight: 5,
+            }}
+          >
+            <Text style={{ color: "white" }}>Add</Text>
+          </TouchableOpacity>
+        </View>
       </View>
       {/* List of Items */}
       {list.items.map((item, index) => (
@@ -229,6 +260,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 20,
     textAlign: "center",
+    color: "white",
   },
   input: {
     flex: 1,
@@ -264,11 +296,12 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     padding: 10,
     borderBottomWidth: 1,
-    borderBottomColor: "black",
+    borderBottomColor: "white",
+    
   },
   itemText: {
     fontSize: 16,
-    color: "#1e252b",
+    color: "white",
   },
   completedItem: {
     fontSize: 16,

@@ -66,10 +66,28 @@ const JoinCollabListSection: React.FC<JoinCollabListSectionProps> = ({
 
   return (
     <Animated.View style={[styles.container, { height: heightAnim, opacity }]}>
-      <View style={styles.categorySection}>
-
-        <View style={styles.row}>
-          <View style={styles.flex}>
+    <View
+        style={{
+          justifyContent: "center",
+          alignItems: "center",
+          width: "100%",
+          backgroundColor: "white",
+          borderRadius: 10,
+          padding: 5,
+          borderWidth: 1,
+          borderColor: "lightgrey",
+          margin: 20,
+        }}
+      >
+        <View style={{ flexDirection: "row" }}>
+          <View
+            style={{
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "flex-start",
+              paddingLeft: 10,
+            }}
+          >
             <TextInput
               placeholder="Enter invite code"
               keyboardType="default"
@@ -77,8 +95,19 @@ const JoinCollabListSection: React.FC<JoinCollabListSectionProps> = ({
               value={link}
             />
           </View>
-          <TouchableOpacity onPress={handleSubmit} style={styles.button}>
-            <Text style={styles.buttonText}>Join</Text>
+          <TouchableOpacity
+            onPress={handleSubmit}
+            style={{
+              height: 40,
+              paddingHorizontal: 15,
+              justifyContent: "center",
+              alignItems: "center",
+              backgroundColor: "blue",
+              borderRadius: 10,
+              marginRight: 5,
+            }}
+          >
+            <Text style={{ color: "white" }}>Join</Text>
           </TouchableOpacity>
         </View>
       </View>
