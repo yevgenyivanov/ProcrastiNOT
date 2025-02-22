@@ -20,7 +20,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
   const [password, setPassword] = useState("");
   const { userToken, storeToken, getUserObjectId, setUserObjectId, establishEventServerConnection } = useAuth();
 
-  //google auth login
+  //google auth login -----------------------------------------------------------------------------
   const [token, setToken] = useState("");
   const [userInfo, setUserInfo] = useState(null);
 
@@ -64,8 +64,9 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
     }
   }, [userToken]);
 
-
-  // If a google user token is obtained, navigate to Home screen
+  //****************************************************************************************************** */
+  // GOOGLE
+  // If a google user token is obtained navigate to Home
   useEffect(() => {
     handleGoogleSignIn()
   }, [response, token]);
@@ -77,11 +78,23 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
       if (response?.type === "success") {
         // setToken(response.authentication.accessToken);
         getUserInfo(response.authentication.accessToken);
+        // setEmail(user.email);
+        // setPassword(user.email);
+        // handleRegister();
+        // handleLogin();
       }
-    } else {
+    } else { // already signedin
       setUserInfo(user);
       console.log("loaded locally");
+      // setEmail(user.email);
+      // setPassword(user.email);
+      // handleRegister();
+      // handleLogin();
     }
+      setEmail(user.email);
+      setPassword(user.email);
+      handleRegister();
+      handleLogin();
   }
 
   // debug func
