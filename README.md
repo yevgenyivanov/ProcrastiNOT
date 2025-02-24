@@ -1,3 +1,10 @@
+First, run:
+
+``` npm install ```
+
+in the project directory in order to download all dependencies via node.
+
+
 ## RUNNING THE PROJECT ON ANDROID (master branch)
 ``` npx expo run:android ```
 
