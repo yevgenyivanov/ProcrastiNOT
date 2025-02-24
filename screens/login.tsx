@@ -25,9 +25,8 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
   const [userInfo, setUserInfo] = useState(null);
 
   const [request, response, promptAsync] = Google.useAuthRequest({
-    androidClientId: "24654489274-3s0s4l7asm2rdgegc5mchg38kuulmjh8.apps.googleusercontent.com",
-    iosClientId: "tbp",
-    
+    androidClientId: "googleCloudAPI_here",
+    iosClientId: "googleCloudAPI_here",
     // webClientId: "",
     
   });
